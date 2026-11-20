@@ -1,0 +1,99 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}All Bookings - EventEase Admin{% endblock %}
+{% block page_title %}Booking Registrations{% endblock %}
+
+{% block admin_content %}
+<div class="dashboard-panel">
+  
+  <div class="panel-header">
+    <div style="display: flex; align-items: center; gap: 1rem; flex: 1; max-width: 420px;">
+      <div class="search-input-group" style="background: var(--bg-body); padding: 0.5rem 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); width: 100%;">
+        <i class="fas fa-search"></i>
+        <input type="text" id="adminTableSearch" placeholder="Filter bookings by code, user or event...">
+      </div>
+    </div>
+
+    <div style="font-size: 0.875rem; color: var(--text-muted);">
+      Total Bookings: <strong>{{ bookings|length }}</strong>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Attendee Details</th>
+          <th>Event</th>
+          <th>Tickets</th>
+          <th>Amount</th>
+          <th>Payment</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in bookings %}
+          <tr>
+            <td>
+              <strong style="font-family: monospace; color: var(--primary);">{{ b.booking_code }}</strong>
+            </td>
+            <td>
+              <div>
+                <strong>{{ b.user_name }}</strong>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ b.user_email }}</div>
+                {% if b.user_phone %}
+                  <div style="font-size: 0.75rem; color: var(--text-muted);"><i class="fas fa-phone"></i> {{ b.user_phone }}</div>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              <strong>{{ b.event_title }}</strong>
+            </td>
+            <td><strong>{{ b.tickets_count }}</strong></td>
+            <td>
+              <strong>${{ "%.2f"|format(b.total_amount) }}</strong>
+            </td>
+            <td>
+              <span style="font-size: 0.85rem; text-transform: capitalize; color: var(--text-muted);">
+                {{ b.payment_method|replace('_', ' ') if b.payment_method else 'Credit Card' }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge status-{{ b.booking_status }}">
+                {{ b.booking_status|capitalize }}
+              </span>
+            </td>
+            <td style="color: var(--text-muted); font-size: 0.85rem;">
+              {{ b.booking_date.strftime('%b %d, %Y %H:%M') if b.booking_date is not string else b.booking_date }}
+            </td>
+            <td style="text-align: right;">
+              <div class="table-actions" style="justify-content: flex-end;">
+                <a href="{{ url_for('booking_confirmation', code=b.booking_code) }}" target="_blank" class="action-btn" title="View Ticket Voucher">
+                  <i class="fas fa-receipt"></i>
+                </a>
+                {% if b.booking_status == 'confirmed' %}
+                  <form method="POST" action="{{ url_for('admin_booking_cancel', booking_id=b.id) }}" class="form-delete-confirm" data-item="booking {{ b.booking_code }}" style="display: inline;">
+                    <button type="submit" class="action-btn danger" title="Cancel Booking & Refund Capacity">
+                      <i class="fas fa-ban"></i>
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+              No booking records found in the database.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

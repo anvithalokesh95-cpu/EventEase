@@ -1,0 +1,167 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Dashboard Overview - EventEase Admin{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block admin_content %}
+<!-- KPI Stats Ribbon -->
+<div class="stats-grid">
+  
+  <div class="stat-card">
+    <div class="stat-icon primary">
+      <i class="fas fa-dollar-sign"></i>
+    </div>
+    <div class="stat-details">
+      <h4>${{ "{:,.2f}".format(stats.total_revenue) }}</h4>
+      <p>Gross Ticket Revenue</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon success">
+      <i class="fas fa-ticket-alt"></i>
+    </div>
+    <div class="stat-details">
+      <h4>{{ stats.total_bookings }}</h4>
+      <p>Total Bookings Placed</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon info">
+      <i class="fas fa-calendar-check"></i>
+    </div>
+    <div class="stat-details">
+      <h4>{{ stats.total_events }}</h4>
+      <p>Active Live Events</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon warning">
+      <i class="fas fa-users"></i>
+    </div>
+    <div class="stat-details">
+      <h4>{{ stats.total_users }}</h4>
+      <p>Registered Attendees</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Chart & Inventory Row -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+  
+  <!-- Interactive Revenue Trend Chart Panel -->
+  <div class="dashboard-panel" style="margin-bottom: 0;">
+    <div class="panel-header">
+      <div class="panel-title">
+        <i class="fas fa-chart-line" style="color: var(--primary);"></i> Revenue &amp; Ticket Velocity
+      </div>
+      <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Last 7 Days Activity</span>
+    </div>
+    <div class="panel-body">
+      <div id="revenueAnalyticsChart" data-points="[450, 890, 620, 1250, 940, 1680, 1420]"></div>
+      <div style="display: flex; justify-content: space-between; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.85rem; color: var(--text-muted);">
+        <span>Average Daily Volume: <strong>${{ "%.2f"|format(stats.total_revenue / 7 if stats.total_revenue else 0) }}</strong></span>
+        <span>Ticket Conversion Rate: <strong style="color: var(--success);">88.4%</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket Inventory Watchlist Panel -->
+  <div class="dashboard-panel" style="margin-bottom: 0;">
+    <div class="panel-header">
+      <div class="panel-title">
+        <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i> Capacity Watchlist
+      </div>
+    </div>
+    <div class="panel-body" style="padding: 1rem 1.25rem;">
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        {% for ev in low_capacity_events %}
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 0.25rem;">
+              <strong style="color: var(--text-main); max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ ev.title }}</strong>
+              <span style="color: {% if ev.available_tickets < 50 %}var(--danger){% else %}var(--warning){% endif %}; font-weight: 700;">
+                {{ ev.available_tickets }} left
+              </span>
+            </div>
+            <div style="width: 100%; height: 6px; background: var(--bg-subtle); border-radius: var(--radius-full); overflow: hidden;">
+              <div style="width: {{ ((ev.total_tickets - ev.available_tickets) / ev.total_tickets * 100)|round }}%; height: 100%; background: {% if ev.available_tickets < 50 %}var(--danger){% else %}var(--warning){% endif %};"></div>
+            </div>
+          </div>
+        {% else %}
+          <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 1.5rem 0;">All events have healthy ticket inventories.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Recent Bookings Table Panel -->
+<div class="dashboard-panel">
+  <div class="panel-header">
+    <div class="panel-title">
+      <i class="fas fa-receipt" style="color: var(--primary);"></i> Recent Bookings &amp; Transactions
+    </div>
+    <a href="{{ url_for('admin_bookings') }}" class="btn btn-outline btn-sm">
+      View All Bookings <i class="fas fa-arrow-right"></i>
+    </a>
+  </div>
+  
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Booking ID</th>
+          <th>Attendee</th>
+          <th>Event</th>
+          <th>Passes</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in recent_bookings %}
+          <tr>
+            <td>
+              <strong style="font-family: monospace; color: var(--primary);">{{ b.booking_code }}</strong>
+            </td>
+            <td>
+              <div>
+                <strong>{{ b.user_name }}</strong>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ b.user_email }}</div>
+              </div>
+            </td>
+            <td>
+              <strong style="color: var(--text-main);">{{ b.event_title }}</strong>
+            </td>
+            <td>{{ b.tickets_count }}</td>
+            <td><strong>${{ "%.2f"|format(b.total_amount) }}</strong></td>
+            <td>
+              <span class="status-badge status-{{ b.booking_status }}">
+                {{ b.booking_status|capitalize }}
+              </span>
+            </td>
+            <td style="color: var(--text-muted); font-size: 0.85rem;">
+              {{ b.booking_date.strftime('%b %d, %Y %H:%M') if b.booking_date is not string else b.booking_date }}
+            </td>
+            <td style="text-align: right;">
+              <a href="{{ url_for('booking_confirmation', code=b.booking_code) }}" target="_blank" class="action-btn" title="View Digital Voucher">
+                <i class="fas fa-external-link-alt"></i>
+              </a>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">No bookings found yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

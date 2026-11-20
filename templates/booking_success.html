@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Confirmed - {{ booking.booking_code }} - EventEase{% endblock %}
+
+{% block content %}
+<div class="container container-narrow" style="padding-top: 3.5rem; padding-bottom: 5rem;">
+  
+  <div style="text-align: center; margin-bottom: 2.5rem;">
+    <div style="width: 72px; height: 72px; background: var(--success-bg); color: var(--success); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-bottom: 1rem; box-shadow: 0 0 0 10px rgba(16, 185, 129, 0.1);">
+      <i class="fas fa-check"></i>
+    </div>
+    <h1 style="font-size: 2.3rem; font-weight: 800; margin-bottom: 0.5rem;">You're Going!</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem;">
+      Your tickets have been confirmed and sent to <strong>{{ booking.user_email }}</strong>.
+    </p>
+  </div>
+
+  <!-- Printable Digital Ticket Voucher -->
+  <div class="ticket-slip" id="printableTicket">
+    <div class="ticket-header">
+      <div>
+        <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 1px;">Official Admission Pass</span>
+        <h2 style="font-size: 1.5rem; margin-top: 0.25rem;">{{ booking.event_title }}</h2>
+      </div>
+      <div class="ticket-code">
+        {{ booking.booking_code }}
+      </div>
+    </div>
+
+    <div class="ticket-grid">
+      <div class="ticket-field">
+        <label>Date &amp; Time</label>
+        <span>{{ booking.event_date.strftime('%b %d, %Y • %I:%M %p') if booking.event_date is not string else booking.event_date }}</span>
+      </div>
+      <div class="ticket-field">
+        <label>Venue</label>
+        <span>{{ booking.venue_name }}, {{ booking.location }}</span>
+      </div>
+      <div class="ticket-field">
+        <label>Primary Attendee</label>
+        <span>{{ booking.user_name }}</span>
+      </div>
+      <div class="ticket-field">
+        <label>Pass Count</label>
+        <span>{{ booking.tickets_count }} Ticket(s)</span>
+      </div>
+      <div class="ticket-field">
+        <label>Total Paid</label>
+        <span>${{ "%.2f"|format(booking.total_amount) }} ({{ booking.payment_method|replace('_', ' ')|capitalize }})</span>
+      </div>
+      <div class="ticket-field">
+        <label>Transaction Ref</label>
+        <span style="font-family: monospace; font-size: 0.95rem;">{{ booking.transaction_id }}</span>
+      </div>
+    </div>
+
+    <!-- Ticket Footer with simulated QR code -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.5rem; border-top: 1px dashed var(--border-color);">
+      <div>
+        <span style="display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Status</span>
+        <span class="status-badge status-confirmed"><i class="fas fa-check-circle"></i> Confirmed &amp; Active</span>
+      </div>
+
+      <!-- QR Code graphic -->
+      <div style="background: #FFFFFF; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+        <svg width="68" height="68" viewBox="0 0 68 68" xmlns="http://www.w3.org/2000/svg">
+          <!-- Outer border modules -->
+          <rect x="4" y="4" width="20" height="20" fill="#0F172A" />
+          <rect x="8" y="8" width="12" height="12" fill="#FFFFFF" />
+          <rect x="11" y="11" width="6" height="6" fill="#0F172A" />
+
+          <rect x="44" y="4" width="20" height="20" fill="#0F172A" />
+          <rect x="48" y="8" width="12" height="12" fill="#FFFFFF" />
+          <rect x="51" y="11" width="6" height="6" fill="#0F172A" />
+
+          <rect x="4" y="44" width="20" height="20" fill="#0F172A" />
+          <rect x="8" y="48" width="12" height="12" fill="#FFFFFF" />
+          <rect x="11" y="51" width="6" height="6" fill="#0F172A" />
+
+          <!-- Data pattern bits -->
+          <rect x="30" y="8" width="6" height="6" fill="#0F172A" />
+          <rect x="30" y="18" width="6" height="6" fill="#0F172A" />
+          <rect x="8" y="30" width="6" height="6" fill="#0F172A" />
+          <rect x="18" y="30" width="6" height="6" fill="#0F172A" />
+          <rect x="30" y="30" width="8" height="8" fill="#4F46E5" />
+          <rect x="44" y="30" width="6" height="6" fill="#0F172A" />
+          <rect x="54" y="36" width="6" height="6" fill="#0F172A" />
+          <rect x="30" y="44" width="6" height="6" fill="#0F172A" />
+          <rect x="30" y="54" width="6" height="6" fill="#0F172A" />
+          <rect x="44" y="48" width="16" height="16" fill="#0F172A" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Controls -->
+  <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
+    <button onclick="window.print()" class="btn btn-outline">
+      <i class="fas fa-print"></i> Print Voucher
+    </button>
+    <a href="{{ url_for('profile') }}" class="btn btn-primary">
+      <i class="fas fa-list-alt"></i> View in My Bookings
+    </a>
+    <a href="{{ url_for('events') }}" class="btn btn-outline">
+      <i class="fas fa-compass"></i> Discover More Events
+    </a>
+  </div>
+
+</div>
+
+<style>
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printableTicket, #printableTicket * {
+    visibility: visible;
+  }
+  #printableTicket {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+  }
+}
+</style>
+{% endblock %}

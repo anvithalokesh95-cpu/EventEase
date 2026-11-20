@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal Sign In - EventEase</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body style="background: #0B0F19; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+  
+  <div style="width: 100%; max-width: 440px;">
+    
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <a href="{{ url_for('index') }}">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="EventEase" style="height: 44px; margin: 0 auto 1.5rem; filter: brightness(0) invert(1);">
+      </a>
+      <span class="status-badge" style="background: rgba(99, 102, 241, 0.2); color: #A5B4FC; font-size: 0.8rem; margin-bottom: 0.5rem;">
+        <i class="fas fa-lock"></i> Restricted Area
+      </span>
+      <h2 style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF;">Admin Dashboard</h2>
+      <p style="color: #94A3B8; font-size: 0.9rem;">Authenticate to manage events, ticket sales and users</p>
+    </div>
+
+    <!-- Flash messages inside admin login -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div style="padding: 0.85rem 1rem; border-radius: var(--radius-md); margin-bottom: 1.25rem; font-size: 0.875rem; background: {% if category == 'success' %}#064E3B{% else %}#7F1D1D{% endif %}; color: #FFFFFF; display: flex; align-items: center; gap: 0.6rem;">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div style="background: #1E293B; border-radius: var(--radius-xl); border: 1px solid #334155; padding: 2.25rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+      
+      <!-- Quick Demo Credentials Box -->
+      <div style="background: #0F172A; border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.5rem; border: 1px solid #334155; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <strong style="color: #F8FAFC; display: block;">Default Credentials:</strong>
+          <span style="color: #94A3B8;">admin / Admin@123</span>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" onclick="fillAdminDemo()" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">
+          Autofill
+        </button>
+      </div>
+
+      <form method="POST" action="{{ url_for('admin_login') }}">
+        <div class="form-group">
+          <label class="form-label" style="color: #E2E8F0;">Administrator Username or Email</label>
+          <input type="text" name="username" id="adminUser" class="form-control" placeholder="admin" required autofocus style="background: #0F172A; border-color: #334155; color: #FFFFFF;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.75rem;">
+          <label class="form-label" style="color: #E2E8F0;">Master Password</label>
+          <input type="password" name="password" id="adminPass" class="form-control" placeholder="••••••••" required style="background: #0F172A; border-color: #334155; color: #FFFFFF;">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);">
+          <i class="fas fa-shield-alt"></i> Access Dashboard
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #334155;">
+        <a href="{{ url_for('index') }}" style="color: #94A3B8; font-size: 0.85rem; text-decoration: none;">
+          <i class="fas fa-arrow-left"></i> Return to Public Website
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    function fillAdminDemo() {
+      document.getElementById('adminUser').value = 'admin';
+      document.getElementById('adminPass').value = 'Admin@123';
+    }
+  </script>
+</body>
+</html>

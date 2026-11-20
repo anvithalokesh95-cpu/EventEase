@@ -1,0 +1,75 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Manage Users - EventEase Admin{% endblock %}
+{% block page_title %}Registered Attendees &amp; Users{% endblock %}
+
+{% block admin_content %}
+<div class="dashboard-panel">
+  
+  <div class="panel-header">
+    <div style="display: flex; align-items: center; gap: 1rem; flex: 1; max-width: 420px;">
+      <div class="search-input-group" style="background: var(--bg-body); padding: 0.5rem 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); width: 100%;">
+        <i class="fas fa-search"></i>
+        <input type="text" id="adminTableSearch" placeholder="Search users by name, email or phone...">
+      </div>
+    </div>
+
+    <div style="font-size: 0.875rem; color: var(--text-muted);">
+      Total Registered Users: <strong>{{ users|length }}</strong>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Contact Email</th>
+          <th>Phone Number</th>
+          <th>Registered Date</th>
+          <th>Bookings Placed</th>
+          <th>Total Spend</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <img src="{{ url_for('static', filename='images/default-avatar.svg') }}" 
+                     alt="{{ u.full_name }}" 
+                     style="width: 38px; height: 38px; border-radius: 50%;">
+                <strong style="color: var(--text-main);">{{ u.full_name }}</strong>
+              </div>
+            </td>
+            <td>
+              <a href="mailto:{{ u.email }}" style="color: var(--primary);">{{ u.email }}</a>
+            </td>
+            <td style="color: var(--text-muted);">
+              {{ u.phone or 'Not provided' }}
+            </td>
+            <td style="color: var(--text-muted); font-size: 0.85rem;">
+              {{ u.created_at.strftime('%b %d, %Y') if u.created_at is not string else u.created_at[:10] }}
+            </td>
+            <td>
+              <span class="status-badge" style="background: var(--primary-light); color: var(--primary);">
+                {{ u.booking_count|default(0) }} Booking(s)
+              </span>
+            </td>
+            <td>
+              <strong>${{ "%.2f"|format(u.total_spend|default(0)) }}</strong>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+              No users registered yet.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

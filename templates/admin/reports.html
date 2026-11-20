@@ -1,0 +1,152 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Reports &amp; Analytics - EventEase Admin{% endblock %}
+{% block page_title %}Analytics &amp; Financial Reports{% endblock %}
+
+{% block admin_content %}
+<!-- Report Action Toolbar -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h2 style="font-size: 1.5rem; font-weight: 800;">Executive Performance Summary</h2>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">Consolidated financial and ticket velocity audit.</p>
+  </div>
+  <button onclick="window.print()" class="btn btn-outline btn-sm">
+    <i class="fas fa-print"></i> Export / Print Audit
+  </button>
+</div>
+
+<!-- Telemetry Summary Cards -->
+<div class="stats-grid" style="margin-bottom: 2.5rem;">
+  
+  <div class="stat-card">
+    <div class="stat-icon primary"><i class="fas fa-vault"></i></div>
+    <div class="stat-details">
+      <h4>${{ "{:,.2f}".format(total_revenue) }}</h4>
+      <p>Gross Lifetime Revenue</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon success"><i class="fas fa-ticket-alt"></i></div>
+    <div class="stat-details">
+      <h4>{{ total_tickets_sold }}</h4>
+      <p>Tickets Reserved</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon info"><i class="fas fa-calculator"></i></div>
+    <div class="stat-details">
+      <h4>${{ "%.2f"|format(avg_order_value) }}</h4>
+      <p>Average Order Value (AOV)</p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon warning"><i class="fas fa-percentage"></i></div>
+    <div class="stat-details">
+      <h4>{{ sell_through_rate }}%</h4>
+      <p>Overall Sell-Through Rate</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Revenue by Category Breakdown -->
+<div class="dashboard-panel" style="margin-bottom: 2rem;">
+  <div class="panel-header">
+    <div class="panel-title">
+      <i class="fas fa-pie-chart" style="color: var(--primary);"></i> Revenue Breakdown by Event Category
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Events Count</th>
+          <th>Passes Sold</th>
+          <th>Total Revenue</th>
+          <th>Revenue Share</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat in category_stats %}
+          <tr>
+            <td>
+              <strong style="color: var(--text-main);">{{ cat.name }}</strong>
+            </td>
+            <td>{{ cat.event_count }}</td>
+            <td>{{ cat.tickets_sold|default(0) }}</td>
+            <td>
+              <strong>${{ "%.2f"|format(cat.revenue|default(0)) }}</strong>
+            </td>
+            <td style="min-width: 140px;">
+              {% set share = (cat.revenue / total_revenue * 100)|round(1) if total_revenue > 0 else 0 %}
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
+                <span>{{ share }}%</span>
+              </div>
+              <div style="width: 100%; height: 6px; background: var(--bg-subtle); border-radius: var(--radius-full); overflow: hidden;">
+                <div style="width: {{ share }}%; height: 100%; background: var(--primary);"></div>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Event Performance Audit Table -->
+<div class="dashboard-panel">
+  <div class="panel-header">
+    <div class="panel-title">
+      <i class="fas fa-trophy" style="color: var(--warning);"></i> Event Ticket Velocity &amp; Revenue Ranking
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Event Title</th>
+          <th>Date</th>
+          <th>Ticket Price</th>
+          <th>Capacity Sold</th>
+          <th>Sell-Through %</th>
+          <th style="text-align: right;">Generated Revenue</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ev in event_rankings %}
+          {% set sold = ev.total_tickets - ev.available_tickets %}
+          {% set rate = ((sold / ev.total_tickets) * 100)|round(1) %}
+          <tr>
+            <td>
+              <strong style="color: var(--text-main);">{{ ev.title }}</strong>
+            </td>
+            <td style="font-size: 0.85rem; color: var(--text-muted);">
+              {{ ev.event_date.strftime('%b %d, %Y') if ev.event_date is not string else ev.event_date[:10] }}
+            </td>
+            <td>
+              {% if ev.ticket_price == 0 %}FREE{% else %}${{ "%.2f"|format(ev.ticket_price) }}{% endif %}
+            </td>
+            <td>
+              {{ sold }} / {{ ev.total_tickets }}
+            </td>
+            <td>
+              <span class="status-badge {% if rate >= 50 %}status-confirmed{% else %}status-refunded{% endif %}">
+                {{ rate }}%
+              </span>
+            </td>
+            <td style="text-align: right;">
+              <strong style="color: var(--primary); font-size: 1.05rem;">
+                ${{ "%.2f"|format(sold * ev.ticket_price) }}
+              </strong>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

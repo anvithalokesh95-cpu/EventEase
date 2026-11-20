@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="40%" stop-color="#1E1B4B" />
+      <stop offset="100%" stop-color="#312E81" />
+    </linearGradient>
+    <linearGradient id="cyanPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="50%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="450" fill="url(#bgGrad)" />
+  <rect width="800" height="450" fill="url(#grid)" />
+
+  <!-- Abstract Tech Spheres -->
+  <circle cx="650" cy="180" r="160" fill="none" stroke="url(#cyanPurple)" stroke-width="2" opacity="0.6" />
+  <circle cx="650" cy="180" r="110" fill="none" stroke="#06B6D4" stroke-width="1.5" stroke-dasharray="8 6" opacity="0.7" />
+  <circle cx="650" cy="180" r="60" fill="url(#cyanPurple)" opacity="0.35" />
+  <circle cx="650" cy="180" r="20" fill="#06B6D4" />
+
+  <!-- Code Nodes -->
+  <line x1="500" y1="120" x2="650" y2="180" stroke="#6366F1" stroke-width="2" opacity="0.4" />
+  <line x1="650" y1="180" x2="720" y2="300" stroke="#A855F7" stroke-width="2" opacity="0.4" />
+  <circle cx="500" cy="120" r="6" fill="#06B6D4" />
+  <circle cx="720" cy="300" r="6" fill="#EC4899" />
+
+  <!-- Content Overlay -->
+  <g transform="translate(60, 130)">
+    <rect x="0" y="0" width="130" height="32" rx="16" fill="rgba(6, 182, 212, 0.15)" stroke="#06B6D4" stroke-width="1.5" />
+    <text x="65" y="21" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="700" fill="#22D3EE" text-anchor="middle" letter-spacing="1">AI & TECH</text>
+    
+    <text x="0" y="90" font-family="'Plus Jakarta Sans', sans-serif" font-size="44" font-weight="900" fill="#FFFFFF" letter-spacing="-1">Global Tech &amp; AI</text>
+    <text x="0" y="140" font-family="'Plus Jakarta Sans', sans-serif" font-size="44" font-weight="900" fill="url(#cyanPurple)" letter-spacing="-1">Summit 2026</text>
+    
+    <text x="0" y="195" font-family="'Inter', sans-serif" font-size="16" fill="#94A3B8">Next-Gen Intelligence • Edge Systems • Quantum Computing</text>
+    
+    <g transform="translate(0, 230)">
+      <circle cx="10" cy="0" r="4" fill="#10B981" />
+      <text x="22" y="4" font-family="'Inter', sans-serif" font-size="14" font-weight="600" fill="#E2E8F0">Moscone Center, San Francisco</text>
+    </g>
+  </g>
+</svg>

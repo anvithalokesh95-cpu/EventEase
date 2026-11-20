@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}EventEase - Discover, Book &amp; Experience Exceptional Events{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="hero-badge">
+        <i class="fas fa-sparkles text-gradient"></i>
+        <span>Premier Event Discovery &amp; Ticketing</span>
+      </div>
+      <h1 class="hero-title">
+        Discover, Book &amp; Experience <span class="text-gradient">Extraordinary Events</span>
+      </h1>
+      <p class="hero-subtitle">
+        Your unified platform for tech summits, indie music festivals, venture galas, and cultural exhibitions. Instant ticketing with zero friction.
+      </p>
+
+      <div class="hero-actions">
+        <a href="{{ url_for('events') }}" class="btn btn-primary btn-lg">
+          <i class="fas fa-compass"></i> Explore All Events
+        </a>
+        <a href="#featuredEvents" class="btn btn-outline btn-lg">
+          <i class="fas fa-calendar-star"></i> Featured Today
+        </a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-item">
+          <h3>500+</h3>
+          <p>Curated Events</p>
+        </div>
+        <div class="stat-item">
+          <h3>120k+</h3>
+          <p>Tickets Reserved</p>
+        </div>
+        <div class="stat-item">
+          <h3>99.9%</h3>
+          <p>Booking Reliability</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="hero-banner-card">
+        <img src="{{ url_for('static', filename='images/banners/tech_summit.svg') }}" alt="Featured Summit Banner">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main Event Exploration Section -->
+<section class="container" id="featuredEvents" style="padding-top: 3.5rem; padding-bottom: 4rem;">
+  
+  <!-- Search & Filter Controls -->
+  <div class="search-filter-section">
+    <div class="search-box">
+      <div class="search-input-group">
+        <i class="fas fa-search"></i>
+        <input type="text" id="liveEventSearch" placeholder="Search events by title, keyword, or venue...">
+      </div>
+      <div class="search-divider"></div>
+      <div class="search-input-group" style="max-width: 200px;">
+        <i class="fas fa-map-marker-alt"></i>
+        <select onchange="document.getElementById('liveEventSearch').dispatchEvent(new Event('input'))">
+          <option value="">All Locations</option>
+          <option value="San Francisco">San Francisco</option>
+          <option value="New York">New York</option>
+          <option value="Austin">Austin</option>
+          <option value="Chicago">Chicago</option>
+          <option value="San Diego">San Diego</option>
+          <option value="Napa Valley">Napa Valley</option>
+        </select>
+      </div>
+      <a href="{{ url_for('events') }}" class="btn btn-primary">
+        <i class="fas fa-sliders-h"></i> Browse Catalog
+      </a>
+    </div>
+
+    <!-- Category Pills -->
+    <div class="category-pills">
+      <button class="category-pill active" data-slug="all">
+        <i class="fas fa-th-large"></i> All Categories
+      </button>
+      {% for cat in categories %}
+        <button class="category-pill" data-slug="{{ cat.slug }}">
+          <i class="{{ cat.icon }}"></i> {{ cat.name }}
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Section Header -->
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Upcoming Premier Events</h2>
+      <p class="section-subtitle">Secure your verified seats before registration caps are reached</p>
+    </div>
+    <a href="{{ url_for('events') }}" class="btn btn-outline btn-sm">
+      View All ({{ events|length }}) <i class="fas fa-arrow-right"></i>
+    </a>
+  </div>
+
+  <!-- Event Cards Grid -->
+  <div class="event-grid">
+    {% for ev in events %}
+      <article class="event-card event-card-item" 
+               data-category="{{ ev.category_slug }}"
+               data-title="{{ ev.title }}"
+               data-desc="{{ ev.description }}"
+               data-location="{{ ev.location }}">
+        
+        <div class="event-card-media">
+          <img src="{{ url_for('static', filename='images/banners/' + ev.banner_image) }}" 
+               alt="{{ ev.title }}"
+               onerror="this.src='{{ url_for('static', filename='images/banners/default_event.svg') }}'">
+          <span class="event-badge">{{ ev.category_name }}</span>
+          <span class="event-price-tag">
+            {% if ev.ticket_price == 0 or ev.ticket_price == 0.0 %}
+              FREE
+            {% else %}
+              ${{ "%.2f"|format(ev.ticket_price) }}
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="event-card-body">
+          <div class="event-meta">
+            <span><i class="far fa-calendar-alt"></i> {{ ev.event_date.strftime('%b %d, %Y') if ev.event_date is not string else ev.event_date[:10] }}</span>
+            <span><i class="far fa-map"></i> {{ ev.location }}</span>
+          </div>
+
+          <h3 class="event-card-title">
+            <a href="{{ url_for('event_details', slug=ev.slug) }}">{{ ev.title }}</a>
+          </h3>
+
+          <p class="event-card-desc">
+            {{ ev.description }}
+          </p>
+
+          <div class="event-card-footer">
+            <div class="ticket-status">
+              {% if ev.available_tickets > 0 %}
+                <i class="fas fa-ticket-alt" style="color: var(--success);"></i>
+                <span style="color: var(--text-muted);"><strong style="color: var(--text-main);">{{ ev.available_tickets }}</strong> tickets left</span>
+              {% else %}
+                <span class="status-badge status-cancelled">Sold Out</span>
+              {% endif %}
+            </div>
+
+            <a href="{{ url_for('event_details', slug=ev.slug) }}" class="btn btn-primary btn-sm">
+              Book Now <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+
+  <!-- Empty state for search filter -->
+  <div id="noEventsMatch" style="display: none; text-align: center; padding: 4rem 1rem; background: #FFFFFF; border-radius: var(--radius-xl); border: 1px dashed var(--border-color);">
+    <i class="fas fa-search" style="font-size: 3rem; color: var(--text-light); margin-bottom: 1rem;"></i>
+    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">No Events Found</h3>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Try adjusting your keyword filter or browse another event category.</p>
+    <button onclick="document.getElementById('liveEventSearch').value=''; document.querySelector('.category-pill[data-slug=all]').click();" class="btn btn-primary">
+      Reset Filters
+    </button>
+  </div>
+</section>
+
+<!-- Platform Value Proposition Section -->
+<section style="background: #FFFFFF; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 5rem 0;">
+  <div class="container">
+    <div style="text-align: center; max-width: 650px; margin: 0 auto 3.5rem;">
+      <span class="hero-badge"><i class="fas fa-gem"></i> Built for Scale</span>
+      <h2 style="font-size: 2.3rem; margin-top: 0.5rem; margin-bottom: 0.75rem;">Why Organizers &amp; Attendees Trust EventEase</h2>
+      <p style="color: var(--text-muted); font-size: 1.05rem;">Engineered from the ground up for seamless booking reliability, enterprise security, and transactional integrity.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2rem;">
+      <div style="padding: 2rem; background: var(--bg-body); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <div style="width: 52px; height: 52px; background: var(--primary-light); color: var(--primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <h4 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Instant Reservation</h4>
+        <p style="color: var(--text-muted); font-size: 0.925rem; line-height: 1.6;">Every booking issues a verified alphanumeric reference code with immediate digital pass generation.</p>
+      </div>
+
+      <div style="padding: 2rem; background: var(--bg-body); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <div style="width: 52px; height: 52px; background: #ECFDF5; color: var(--success); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
+          <i class="fas fa-shield-check"></i>
+        </div>
+        <h4 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Zero Race Conditions</h4>
+        <p style="color: var(--text-muted); font-size: 0.925rem; line-height: 1.6;">Relational database transactions prevent overselling tickets, guaranteeing inventory accuracy under peak traffic.</p>
+      </div>
+
+      <div style="padding: 2rem; background: var(--bg-body); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <div style="width: 52px; height: 52px; background: #FFFBEB; color: var(--warning); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
+          <i class="fas fa-undo-alt"></i>
+        </div>
+        <h4 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Flexible Cancellations</h4>
+        <p style="color: var(--text-muted); font-size: 0.925rem; line-height: 1.6;">Attendees can self-manage their reservations. Cancelled tickets are immediately returned to available capacity.</p>
+      </div>
+
+      <div style="padding: 2rem; background: var(--bg-body); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <div style="width: 52px; height: 52px; background: var(--accent-light); color: var(--accent); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h4 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Admin Telemetry</h4>
+        <p style="color: var(--text-muted); font-size: 0.925rem; line-height: 1.6;">Comprehensive administrator control panel offering live revenue charts, user audits, and exportable reports.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

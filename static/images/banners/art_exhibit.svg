@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#022C22" />
+      <stop offset="50%" stop-color="#064E3B" />
+      <stop offset="100%" stop-color="#0F766E" />
+    </linearGradient>
+    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2DD4BF" />
+      <stop offset="50%" stop-color="#34D399" />
+      <stop offset="100%" stop-color="#A7F3D0" />
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bgGrad)" />
+
+  <!-- Geometric Abstract Polygons -->
+  <circle cx="650" cy="220" r="140" fill="none" stroke="#2DD4BF" stroke-width="2" opacity="0.3" />
+  <rect x="560" y="130" width="180" height="180" rx="30" fill="none" stroke="#34D399" stroke-width="2" transform="rotate(45 650 220)" opacity="0.25" />
+  <circle cx="650" cy="220" r="45" fill="url(#tealGrad)" opacity="0.4" />
+
+  <!-- Content Overlay -->
+  <g transform="translate(60, 130)">
+    <rect x="0" y="0" width="140" height="32" rx="16" fill="rgba(45, 212, 191, 0.15)" stroke="#2DD4BF" stroke-width="1.5" />
+    <text x="70" y="21" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="700" fill="#2DD4BF" text-anchor="middle" letter-spacing="1">CONTEMPORARY</text>
+    
+    <text x="0" y="90" font-family="'Plus Jakarta Sans', sans-serif" font-size="44" font-weight="900" fill="#FFFFFF" letter-spacing="-1">Prism Art &amp; Light</text>
+    <text x="0" y="140" font-family="'Plus Jakarta Sans', sans-serif" font-size="44" font-weight="900" fill="url(#tealGrad)" letter-spacing="-1">Biennial 2026</text>
+    
+    <text x="0" y="195" font-family="'Inter', sans-serif" font-size="16" fill="#A7F3D0">Immersive Light Sculptures • Spatial Sound • Interactive Gallery</text>
+    
+    <g transform="translate(0, 230)">
+      <circle cx="10" cy="0" r="4" fill="#34D399" />
+      <text x="22" y="4" font-family="'Inter', sans-serif" font-size="14" font-weight="600" fill="#E2E8F0">Millennium Arts Center, Chicago IL</text>
+    </g>
+  </g>
+</svg>

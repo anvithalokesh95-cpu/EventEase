@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }} - EventEase{% endblock %}
+
+{% block content %}
+<!-- Event Header Banner Section -->
+<section class="event-detail-hero">
+  <div class="container">
+    <div style="display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+      <span class="hero-badge" style="background: rgba(99, 102, 241, 0.25); color: #C7D2FE;">
+        <i class="{{ event.category_icon }}"></i> {{ event.category_name }}
+      </span>
+      {% if event.status == 'active' and event.available_tickets > 0 %}
+        <span class="status-badge status-confirmed">Registration Open</span>
+      {% elif event.available_tickets == 0 %}
+        <span class="status-badge status-cancelled">Sold Out</span>
+      {% else %}
+        <span class="status-badge status-refunded">{{ event.status|capitalize }}</span>
+      {% endif %}
+    </div>
+
+    <h1 style="font-size: 3rem; font-weight: 800; line-height: 1.2; margin-bottom: 1.5rem; color: #FFFFFF;">
+      {{ event.title }}
+    </h1>
+
+    <div style="display: flex; gap: 2rem; color: #CBD5E1; font-size: 1rem; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 0.6rem;">
+        <i class="far fa-calendar-alt" style="color: var(--secondary); font-size: 1.2rem;"></i>
+        <span>{{ event.event_date.strftime('%A, %B %d, %Y • %I:%M %p') if event.event_date is not string else event.event_date }}</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.6rem;">
+        <i class="fas fa-map-marker-alt" style="color: var(--accent); font-size: 1.2rem;"></i>
+        <span><strong>{{ event.venue_name }}</strong>, {{ event.location }}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Content & Booking Layout -->
+<div class="container">
+  <div class="detail-layout">
+    
+    <!-- Left Column: Description & Details -->
+    <div>
+      <div style="margin-bottom: 2.5rem;">
+        <img src="{{ url_for('static', filename='images/banners/' + event.banner_image) }}" 
+             alt="{{ event.title }}"
+             class="event-detail-banner-img"
+             onerror="this.src='{{ url_for('static', filename='images/banners/default_event.svg') }}'">
+      </div>
+
+      <div class="detail-card" style="margin-bottom: 2rem;">
+        <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">About This Event</h3>
+        <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.8; white-space: pre-line;">
+          {{ event.description }}
+        </p>
+
+        <h4 style="font-size: 1.2rem; margin: 2rem 0 1rem;">Venue &amp; Arrival Details</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; background: var(--bg-body); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Venue Name</span>
+            <strong style="color: var(--text-main);">{{ event.venue_name }}</strong>
+          </div>
+          <div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">City &amp; Region</span>
+            <strong style="color: var(--text-main);">{{ event.location }}</strong>
+          </div>
+          <div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block;">Total Capacity</span>
+            <strong style="color: var(--text-main);">{{ event.total_tickets }} Attendees</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <h3 style="font-size: 1.3rem; margin-bottom: 1rem;"><i class="fas fa-shield-alt" style="color: var(--primary);"></i> EventEase Attendance Guarantee</h3>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.85rem; color: var(--text-muted);">
+          <li style="display: flex; gap: 0.75rem;"><i class="fas fa-check" style="color: var(--success); margin-top: 4px;"></i> Digital ticket voucher with encrypted QR validation code.</li>
+          <li style="display: flex; gap: 0.75rem;"><i class="fas fa-check" style="color: var(--success); margin-top: 4px;"></i> Free self-service cancellation up to 48 hours before event start.</li>
+          <li style="display: flex; gap: 0.75rem;"><i class="fas fa-check" style="color: var(--success); margin-top: 4px;"></i> Priority assistance and dedicated check-in concierge at the venue.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Booking Widget -->
+    <div>
+      <div class="booking-sidebar-card">
+        <h3 style="font-size: 1.35rem; margin-bottom: 0.5rem;">Reserve Your Pass</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Instant confirmation &amp; digital ticket receipt.</p>
+
+        <div class="price-display">
+          <span class="amount" id="unitPrice" data-price="{{ event.ticket_price }}">
+            {% if event.ticket_price == 0 or event.ticket_price == 0.0 %}
+              FREE
+            {% else %}
+              ${{ "%.2f"|format(event.ticket_price) }}
+            {% endif %}
+          </span>
+          <span class="unit">/ person</span>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.4rem;">
+            <span>Remaining Tickets:</span>
+            <span id="maxAvailable" data-max="{{ event.available_tickets }}" style="color: {% if event.available_tickets < 50 %}var(--danger){% else %}var(--success){% endif %};">
+              {{ event.available_tickets }} of {{ event.total_tickets }}
+            </span>
+          </div>
+          <!-- Progress Bar -->
+          <div style="width: 100%; height: 8px; background: var(--bg-subtle); border-radius: var(--radius-full); overflow: hidden;">
+            <div style="width: {{ ((event.total_tickets - event.available_tickets) / event.total_tickets * 100)|round }}%; height: 100%; background: var(--primary); border-radius: var(--radius-full);"></div>
+          </div>
+        </div>
+
+        {% if event.available_tickets > 0 and event.status == 'active' %}
+          <form action="{{ url_for('booking_checkout', slug=event.slug) }}" method="GET">
+            <div class="form-group">
+              <label class="form-label">Select Ticket Quantity</label>
+              <div class="quantity-picker">
+                <button type="button" class="qty-btn" id="btnQtyMinus">-</button>
+                <input type="number" name="quantity" id="ticketQuantity" class="qty-input" value="1" min="1" max="{{ [event.available_tickets, 10]|min }}">
+                <button type="button" class="qty-btn" id="btnQtyPlus">+</button>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">(Max 10 per order)</span>
+              </div>
+            </div>
+
+            <div style="background: var(--bg-body); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.925rem; color: var(--text-muted);">
+                <span>Subtotal:</span>
+                <strong id="totalAmount" style="color: var(--text-main);">${{ "%.2f"|format(event.ticket_price) }}</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--success); font-weight: 600;">
+                <span>Booking Fee:</span>
+                <span>$0.00 (Waived)</span>
+              </div>
+            </div>
+
+            {% if session.get('user_id') %}
+              <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <i class="fas fa-lock"></i> Proceed to Checkout
+              </button>
+            {% else %}
+              <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <i class="fas fa-sign-in-alt"></i> Sign In &amp; Book Tickets
+              </button>
+              <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.75rem;">
+                No account? You can register in 30 seconds.
+              </p>
+            {% endif %}
+          </form>
+        {% else %}
+          <div style="padding: 1.5rem; background: var(--danger-bg); border-radius: var(--radius-md); text-align: center;">
+            <i class="fas fa-ban" style="font-size: 2rem; color: var(--danger); margin-bottom: 0.5rem;"></i>
+            <h4 style="color: var(--danger); margin-bottom: 0.25rem;">Tickets Unavailable</h4>
+            <p style="font-size: 0.875rem; color: #991B1B;">This event is sold out or has been archived.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/booking.js') }}"></script>
+{% endblock %}

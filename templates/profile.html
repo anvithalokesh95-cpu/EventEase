@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile &amp; Bookings - EventEase{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3.5rem; padding-bottom: 5rem;">
+  
+  <div style="display: grid; grid-template-columns: 320px 1fr; gap: 2.5rem; align-items: start;">
+    
+    <!-- User Profile Card -->
+    <div>
+      <div style="background: #FFFFFF; border-radius: var(--radius-xl); border: 1px solid var(--border-color); padding: 2rem; box-shadow: var(--shadow-sm); text-align: center; margin-bottom: 1.5rem;">
+        <img src="{{ url_for('static', filename='images/default-avatar.svg') }}" 
+             alt="User Avatar"
+             style="width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 1rem; border: 3px solid var(--primary-light);">
+        
+        <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.25rem;">{{ user.full_name }}</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">{{ user.email }}</p>
+
+        <div style="background: var(--bg-body); padding: 1rem; border-radius: var(--radius-md); text-align: left; font-size: 0.875rem; border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-muted);">Phone:</span>
+            <strong>{{ user.phone or 'Not provided' }}</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">Member Since:</span>
+            <strong>{{ user.created_at.strftime('%b %Y') if user.created_at is not string else user.created_at[:7] }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Edit Profile -->
+      <div style="background: #FFFFFF; border-radius: var(--radius-xl); border: 1px solid var(--border-color); padding: 1.75rem; box-shadow: var(--shadow-sm);">
+        <h4 style="font-size: 1.1rem; margin-bottom: 1rem;">Update Profile</h4>
+        <form method="POST" action="{{ url_for('update_profile') }}">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="full_name" class="form-control" value="{{ user.full_name }}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Phone</label>
+            <input type="tel" name="phone" class="form-control" value="{{ user.phone or '' }}" placeholder="+1 (555) 000-0000">
+          </div>
+          <button type="submit" class="btn btn-outline btn-block btn-sm">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Side: Booking History & Management -->
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h2 style="font-size: 1.8rem; font-weight: 800;">My Event Registrations</h2>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">Review your active passes, download vouchers, or manage cancellations.</p>
+        </div>
+        <a href="{{ url_for('events') }}" class="btn btn-primary btn-sm">
+          <i class="fas fa-plus"></i> Find Events
+        </a>
+      </div>
+
+      <!-- Stats ribbon -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: #FFFFFF; padding: 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Total Bookings</span>
+          <h3 style="font-size: 1.8rem; font-weight: 800; margin-top: 0.25rem;">{{ bookings|length }}</h3>
+        </div>
+        <div style="background: #FFFFFF; padding: 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Confirmed Passes</span>
+          <h3 style="font-size: 1.8rem; font-weight: 800; margin-top: 0.25rem; color: var(--primary);">
+            {{ bookings|selectattr('booking_status', 'equalto', 'confirmed')|list|length }}
+          </h3>
+        </div>
+        <div style="background: #FFFFFF; padding: 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Cancelled Passes</span>
+          <h3 style="font-size: 1.8rem; font-weight: 800; margin-top: 0.25rem; color: var(--danger);">
+            {{ bookings|selectattr('booking_status', 'equalto', 'cancelled')|list|length }}
+          </h3>
+        </div>
+      </div>
+
+      <!-- Bookings Cards / Table -->
+      {% if bookings %}
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+          {% for b in bookings %}
+            <div style="background: #FFFFFF; border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 1.5rem; box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+              
+              <div style="display: flex; gap: 1.25rem; align-items: center;">
+                <img src="{{ url_for('static', filename='images/banners/' + b.banner_image) }}" 
+                     alt="{{ b.event_title }}"
+                     style="width: 100px; height: 75px; border-radius: var(--radius-md); object-fit: cover;"
+                     onerror="this.src='{{ url_for('static', filename='images/banners/default_event.svg') }}'">
+                
+                <div>
+                  <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.25rem;">
+                    <span style="font-family: monospace; font-weight: 800; font-size: 0.85rem; background: var(--bg-subtle); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); color: var(--primary);">
+                      {{ b.booking_code }}
+                    </span>
+                    <span class="status-badge status-{{ b.booking_status }}">
+                      {{ b.booking_status|capitalize }}
+                    </span>
+                  </div>
+
+                  <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.25rem;">
+                    <a href="{{ url_for('event_details', slug=b.event_slug) }}">{{ b.event_title }}</a>
+                  </h3>
+                  
+                  <div style="color: var(--text-muted); font-size: 0.85rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <span><i class="far fa-calendar-alt"></i> {{ b.event_date.strftime('%b %d, %Y') if b.event_date is not string else b.event_date[:10] }}</span>
+                    <span><i class="fas fa-ticket-alt"></i> {{ b.tickets_count }} ticket(s)</span>
+                    <span><i class="fas fa-tag"></i> ${{ "%.2f"|format(b.total_amount) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <a href="{{ url_for('booking_confirmation', code=b.booking_code) }}" class="btn btn-outline btn-sm">
+                  <i class="fas fa-receipt"></i> Voucher
+                </a>
+                
+                {% if b.booking_status == 'confirmed' %}
+                  <form method="POST" action="{{ url_for('cancel_booking', code=b.booking_code) }}" onsubmit="return confirm('Are you sure you want to cancel this booking? {{ b.tickets_count }} tickets will be returned to the event capacity.');">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                      <i class="fas fa-times-circle"></i> Cancel
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div style="text-align: center; padding: 4rem 1.5rem; background: #FFFFFF; border-radius: var(--radius-xl); border: 1px dashed var(--border-color);">
+          <i class="fas fa-calendar-plus" style="font-size: 3rem; color: var(--text-light); margin-bottom: 1rem;"></i>
+          <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">No Bookings Yet</h3>
+          <p style="color: var(--text-muted); margin-bottom: 1.5rem;">You haven't reserved any tickets yet. Explore upcoming summits, concerts, and workshops.</p>
+          <a href="{{ url_for('events') }}" class="btn btn-primary">
+            Explore Events Catalog
+          </a>
+        </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

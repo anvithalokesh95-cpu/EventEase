@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Admin Dashboard - EventEase{% endblock %}</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <div class="admin-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-brand">
+        <a href="{{ url_for('admin_dashboard') }}" style="display: flex; align-items: center; gap: 0.6rem; text-decoration: none;">
+          <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="EventEase Admin" style="filter: brightness(0) invert(1);">
+        </a>
+      </div>
+
+      <ul class="admin-nav">
+        <li class="admin-nav-heading">Main Overview</li>
+        <li>
+          <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+            <i class="fas fa-chart-pie"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+
+        <li class="admin-nav-heading">Event Operations</li>
+        <li>
+          <a href="{{ url_for('admin_events') }}" class="admin-nav-link {% if request.endpoint in ['admin_events', 'admin_event_edit'] %}active{% endif %}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Manage Events</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('admin_event_new') }}" class="admin-nav-link {% if request.endpoint == 'admin_event_new' %}active{% endif %}">
+            <i class="fas fa-calendar-plus"></i>
+            <span>Create New Event</span>
+          </a>
+        </li>
+
+        <li class="admin-nav-heading">Audits &amp; Attendees</li>
+        <li>
+          <a href="{{ url_for('admin_bookings') }}" class="admin-nav-link {% if request.endpoint == 'admin_bookings' %}active{% endif %}">
+            <i class="fas fa-ticket-alt"></i>
+            <span>All Bookings</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('admin_users') }}" class="admin-nav-link {% if request.endpoint == 'admin_users' %}active{% endif %}">
+            <i class="fas fa-users"></i>
+            <span>Registered Users</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('admin_reports') }}" class="admin-nav-link {% if request.endpoint == 'admin_reports' %}active{% endif %}">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Reports &amp; Analytics</span>
+          </a>
+        </li>
+
+        <li class="admin-nav-heading">Site Navigation</li>
+        <li>
+          <a href="{{ url_for('index') }}" target="_blank" class="admin-nav-link">
+            <i class="fas fa-external-link-alt"></i>
+            <span>View Public Site</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="admin-sidebar-footer">
+        <div class="admin-user-info">
+          <img src="{{ url_for('static', filename='images/default-avatar.svg') }}" alt="Admin Avatar">
+          <div class="admin-user-details">
+            <h5>{{ session.get('admin_name', 'Administrator') }}</h5>
+            <span>{{ session.get('admin_role', 'SuperAdmin')|capitalize }}</span>
+          </div>
+        </div>
+        <a href="{{ url_for('admin_logout') }}" title="Logout" style="color: #94A3B8; font-size: 1.1rem; padding: 0.4rem;">
+          <i class="fas fa-sign-out-alt"></i>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Admin Container -->
+    <div class="admin-main">
+      
+      <!-- Topbar Header -->
+      <header class="admin-topbar">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <button class="mobile-toggle admin-mobile-toggle" id="adminMobileToggle" style="display: none; background: none; border: none; font-size: 1.3rem; cursor: pointer;">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="admin-topbar-title">
+            <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+          </div>
+        </div>
+
+        <div class="admin-topbar-actions">
+          <!-- Active DB Engine Indicator Badge -->
+          <span class="db-pill {% if db_type == 'mysql' %}mysql{% endif %}">
+            <i class="fas fa-database"></i>
+            <span>DB: {{ db_type|upper }}</span>
+          </span>
+
+          <a href="{{ url_for('admin_event_new') }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> New Event
+          </a>
+        </div>
+      </header>
+
+      <!-- Flash Container -->
+      <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-toast {{ category }}">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'error' or category == 'danger' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                  <span>{{ message }}</span>
+                </div>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1.1rem;">&times;</button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- Admin Page Content -->
+      <div class="admin-content">
+        {% block admin_content %}{% endblock %}
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
